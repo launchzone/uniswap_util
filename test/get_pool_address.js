@@ -3,8 +3,12 @@
 'use strict'
 
 const assert = require('assert')
-const {getPoolAddress} = require('../')
+const {getPoolAddress, getMultiChainPoolAddress} = require('../')
 const {heximalToBuffer} = require('./_lib')
+const {
+    toEthAddress,
+    toFactoryInitCode
+} = require('../lib/formatter')
 
 describe('getPoolAddress', () => {
     it('Not supported exchange throws error', () => {
@@ -263,5 +267,23 @@ describe('getPoolAddress', () => {
         let actualAddress = getPoolAddress('openocean', metapayAddress, busdAddress)
 
         assert.deepStrictEqual(actualAddress, expectAddress)
+    })
+    it('get multi chain pool address', () => {
+        let cakeAddress = heximalToBuffer('0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82')
+        let wbnbAddress = heximalToBuffer('0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c')
+        const PANCAKESWAP_FACTORY_ADDRESS_V1 = toEthAddress(
+            '0xbcfccbde45ce874adcb698cc183debcf17952812'
+        )
+        const PANCAKESWAP_FACTORY_CODE_V1 = toFactoryInitCode(
+            '0xd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66'
+        )
+        let poolAddress = getPoolAddress('pancake', cakeAddress, wbnbAddress)
+        let multiChainPoolAddress = getMultiChainPoolAddress(
+            PANCAKESWAP_FACTORY_ADDRESS_V1,
+            PANCAKESWAP_FACTORY_CODE_V1,
+            cakeAddress,
+            wbnbAddress
+            )
+        assert.deepStrictEqual(poolAddress, multiChainPoolAddress)
     })
 })
